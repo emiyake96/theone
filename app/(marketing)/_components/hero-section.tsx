@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { AnimatedGroup } from '@/components/motion-primitives/animated-group'
 import { TextEffect } from '@/components/motion-primitives/text-effect'
-import { HeroHeader } from "@/components/header"
+import { HeroHeader } from "@/app/(marketing)/_components/header"
 import VercelLogoDark from '@/public/assets/logos/Vercel_wordmark_dark.svg'
 import MotionLogoDark from '@/public/assets/logos/Motion_dark.svg'
 import NeonLogo from '@/public/assets/logos/neon.svg'
