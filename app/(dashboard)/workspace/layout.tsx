@@ -1,6 +1,7 @@
 import React from 'react'
 import { WorkspaceList } from './[workspace]/WorkspaceList'
 import { CreateWorkspace } from './_components/CreateWorkspace'
+import { UserNav } from './_components/UserNav'
 
 const WorkspaceLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -10,6 +11,12 @@ const WorkspaceLayout = ({ children }: { children: React.ReactNode }) => {
         <div className='mt-4'>
             <CreateWorkspace />
         </div>
+        <div className='mt-auto'>
+            <UserNav />
+        </div>
+      </div>
+      <div className='flex-1 h-full bg-background'>
+        {children}
       </div>
     </div>
   )
