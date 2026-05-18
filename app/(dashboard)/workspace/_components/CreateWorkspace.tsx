@@ -115,8 +115,8 @@ export function CreateWorkspace() {
               )}
             </FieldSet>
 
-            <Button type="submit" className="w-50">
-              Create Workspace
+            <Button disabled={createWorkspaceMutation.isPending} type="submit" className="w-50">
+              {createWorkspaceMutation.isPending ? "Creating..." : "Create Workspace" }
             </Button>
           </form>
         </DialogContent>

@@ -7,7 +7,6 @@ import { requiredAuthMiddleware } from "../middlewares/auth";
 import { requireWorkspaceMiddleware } from "../middlewares/workspace";
 import { workspaceSchema } from "../schemas/workspace";
 import { init, Organizations } from "@kinde/management-api-js"
-import { get } from "http";
 
 export const listWorkspaces = base
 .use(requiredAuthMiddleware)
