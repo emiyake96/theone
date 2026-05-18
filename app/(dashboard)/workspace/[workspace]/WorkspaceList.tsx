@@ -1,6 +1,10 @@
+"use client"
+
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { orpc } from "@/lib/orpc";
 import { cn } from "@/lib/utils";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 const workspaces = [
     {
@@ -44,26 +48,31 @@ const getWorspaceColor = (id: string) => {
 }
 
 export function WorkspaceList() {
+    const {data: { workspaces, currentWorkspace}} = useSuspenseQuery(orpc.workspace.list.queryOptions())
     return (
         <TooltipProvider>
           <div className="flex flex-col gap-2">
-            {workspaces.map((workspace) => (
+            {workspaces.map((workspace) => {
+                const isActive = currentWorkspace.orgCode === workspace.id;
+                return (                
                 <Tooltip key={workspace.id}>
                     <TooltipTrigger asChild>
                         <Button 
                             size="icon" 
                             className={cn('size-12 transition-all duration-200',
-                                getWorspaceColor(workspace.id)
+                                getWorspaceColor(workspace.id),
+                                isActive ? 'rounded-lg' : 'rounded-xl'
                             )}
                             >
                                 <span className="text-sm font-semibold">{workspace.avatar}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent side='right'>
-                        <p>{workspace.name}</p>
+                        <p>{workspace.name} {isActive && "(Current)"}</p>
                     </TooltipContent>
                 </Tooltip>
-            ))}
+                )
+            })}
           </div>
         </TooltipProvider>  
     )
