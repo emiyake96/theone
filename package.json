@@ -11,6 +11,12 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@kinde-oss/kinde-auth-nextjs": "^2.12.1",
+    "@kinde/management-api-js": "^0.16.0",
+    "@orpc/client": "^1.14.3",
+    "@orpc/server": "^1.14.3",
+    "@orpc/tanstack-query": "^1.14.3",
+    "@tanstack/react-query": "^5.100.10",
+    "@tanstack/react-query-devtools": "^5.100.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.14.0",
@@ -29,6 +35,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tanstack/eslint-plugin-query": "^5.100.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -21,11 +21,15 @@ import { useForm } from "react-hook-form";
 import { FieldSet } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { workspaceSchema } from "@/app/schemas/workspace";
+import { workspaceSchema, WorkspaceSchemaType } from "@/app/schemas/workspace";
 import { UserNav } from "./UserNav";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { orpc } from "@/lib/orpc";
 
 export function CreateWorkspace() {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const form = useForm({
     resolver: zodResolver(workspaceSchema),
@@ -34,9 +38,28 @@ export function CreateWorkspace() {
     },
   });
 
-  function onSubmit(data: any) {
-    console.log("bang");
-    console.log(data);
+  const createWorkspaceMutation = useMutation(
+    orpc.workspace.create.mutationOptions({
+      onSuccess: (newWorkspace) => {
+        toast.success(`Workspace ${newWorkspace.workspaceName} created successfully!`);
+
+      queryClient.invalidateQueries({
+        queryKey: orpc.workspace.list.queryKey(),
+      })
+
+      form.reset()
+      setOpen(false)
+      },
+
+      onError: (error) => {
+        toast.error(`Failed to create workspace: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+
+    })
+  )
+
+  function onSubmit(values: WorkspaceSchemaType) {
+    createWorkspaceMutation.mutate(values);
   }
 
   function onInvalid(errors: any) {
@@ -65,7 +88,7 @@ export function CreateWorkspace() {
           </TooltipContent>
         </Tooltip>
 
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-106.25">
           <DialogHeader>
             <DialogTitle>Create Workspace</DialogTitle>
             <DialogDescription>
