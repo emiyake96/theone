@@ -1,15 +1,20 @@
+'use client'
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CreditCard, LogOut, Settings, User } from "lucide-react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs";
 import { PortalLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { orpc } from "@/lib/orpc";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 const UserAvatar = {
   src: "https://avatars.githubusercontent.com/u/108645313?v=4",
   alt: "User avatar"
 };
 export function UserNav() {
+  const { data : { user } } = useSuspenseQuery(orpc.workspace.list.queryOptions())
   return (
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -22,8 +27,8 @@ export function UserNav() {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" align="end" side='right' sideOffset={8} forceMount>
           <DropdownMenuLabel className="font-normal">
-            <p className="text-sm font-medium text-gray-900">John Doe</p>
-            <p className="text-xs text-gray-500">john.doe@example.com</p>
+            <div className="text-sm font-medium text-gray-900">{user ? <div className="name">{user.given_name}</div> : <div className="name">John Doe</div>}</div>
+            <p className="text-xs text-gray-500">{user ? user.email : "john.doe@example.com"}</p>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
