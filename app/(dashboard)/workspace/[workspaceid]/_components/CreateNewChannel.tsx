@@ -13,7 +13,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { channelSchema, transformChannelName } from "@/app/schemas/channel";
+import { channelSchema, ChannelSchemaNameType, transformChannelName } from "@/app/schemas/channel";
 import {
   Field,
   FieldDescription,
@@ -21,6 +21,9 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { orpc } from "@/lib/orpc";
+import { toast } from "sonner";
 
 type ChannelFormValues = {
   name: string;
@@ -28,7 +31,7 @@ type ChannelFormValues = {
 
 export function CreateNewChannel() {
   const [open, setOpen] = useState(false);
-
+  const queryClient = useQueryClient()
   const form = useForm<ChannelFormValues>({
     resolver: zodResolver(channelSchema),
     defaultValues: {
@@ -36,25 +39,33 @@ export function CreateNewChannel() {
     },
   });
 
+  const createChannelMutation = useMutation(
+    orpc.channel.create.mutationOptions({
+      onSuccess: (newChannel) => {
+        toast.success(`Channel "${newChannel.name}" created successfully!`);
+        queryClient.invalidateQueries({
+          queryKey: orpc.channel.list.queryKey(),
+        })
+        form.reset();
+        setOpen(false);
+      },
+      onError: (error) => {
+        toast.error(`Failed to create channel: ${error.message}`);
+      }
+    }
+
+    )
+  )
+
   const watchedName = form.watch("name");
 
   const transformedName = watchedName
     ? transformChannelName(watchedName)
     : "";
 
-  function onSubmit(data: ChannelFormValues) {
-    const finalChannelName = transformChannelName(data.name);
 
-    console.log({
-      originalName: data.name,
-      channelName: finalChannelName,
-    });
-
-    // Later, this is where you would call your API/server action.
-    // createChannel({ name: finalChannelName })
-
-    form.reset();
-    setOpen(false);
+  function onSubmit(values: ChannelSchemaNameType) {
+    createChannelMutation.mutate(values);
   }
 
   return (
@@ -107,8 +118,8 @@ export function CreateNewChannel() {
             )}
           />
 
-          <Button type="submit" className="w-50">
-            Create Channel
+          <Button type="submit" className="w-50" disabled={createChannelMutation.isPending}>
+            {createChannelMutation.isPending ? "Creating..." : "Create Channel"}
           </Button>
         </form>
       </DialogContent>
