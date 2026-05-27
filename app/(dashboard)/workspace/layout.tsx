@@ -1,9 +1,10 @@
 import React from 'react'
-import { WorkspaceList } from './[workspace]/WorkspaceList'
+import { WorkspaceList } from './_workspace/WorkspaceList'
 import { CreateWorkspace } from './_components/CreateWorkspace'
 import { UserNav } from './_components/UserNav'
 import { orpc } from '@/lib/orpc'
 import { getQueryClient, HydrateClient } from '@/lib/query/hydration'
+import { Suspense } from 'react'
 
 const WorkspaceLayout = async({ children }: { children: React.ReactNode }) => {
   const queryClient = getQueryClient()
@@ -14,7 +15,13 @@ const WorkspaceLayout = async({ children }: { children: React.ReactNode }) => {
     <div className='flex w-full h-screen'>
       <div className='flex h-full w-16 flex-col items-center bg-secondary py-3 px-2 border-r border-border'>
         <HydrateClient client={queryClient}>
-          <WorkspaceList />
+          <Suspense fallback={<div className="flex flex-col gap-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="size-12 rounded-xl bg-muted animate-pulse" />
+            ))}
+          </div>}>
+            <WorkspaceList />
+          </Suspense>
         </HydrateClient>
         <div className='mt-4'>
             <CreateWorkspace />
