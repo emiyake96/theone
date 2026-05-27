@@ -29,6 +29,7 @@ const WorkspaceLayout = async({ children }: { children: React.ReactNode }) => {
         {children}
       </div>
     </div>
+    
   )
 }
 
