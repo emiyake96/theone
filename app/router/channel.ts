@@ -8,6 +8,7 @@ import { z } from "zod";
 import { init, organization_user, organization_users, Organizations } from "@kinde/management-api-js";
 import { KindeOrganization } from "@kinde-oss/kinde-auth-nextjs";
 
+
 export const createChannel = base
     .use(requiredAuthMiddleware)
     .use(requireWorkspaceMiddleware)
