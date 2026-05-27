@@ -5,6 +5,7 @@ import { requireWorkspaceMiddleware } from '../middlewares/workspace';
 import prisma from '@/lib/db';
 import { createMessageSchema } from '../schemas/message';
 import { getAvatar } from '@/lib/get-avatar';
+import { Message } from '@/lib/generated/prisma/edge';
 
 
 export const createMessage = base
@@ -44,4 +45,38 @@ export const createMessage = base
         return {
             ...created
         }
+    })
+
+export const listMessages = base
+    .use(requiredAuthMiddleware)
+    .use(requireWorkspaceMiddleware)
+    .route({
+        method: "GET",
+        path: "/messages",
+        summary: "List messages in a channel",
+        tags: ["Messages"],
+    }).input(z.object({ channelId: z.string() }))
+    .output(z.array(z.custom<Message>()))
+    .handler(async({ input, context }) => {
+        const channel = await prisma.channel.findFirst({
+            where: {
+                id: input.channelId,
+                workspaceId: context.workspace.orgCode,
+            }
+        })
+
+        if (!channel) {
+            throw new Error("Channel not found");
+        }
+
+        const messages = await prisma.message.findMany({
+            where: {
+                channelId: input.channelId,
+            },
+            orderBy: {
+                createdAt: "asc",
+            }
+        })
+
+        return messages
     })

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
 import { orpc } from "@/lib/orpc";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SendHorizonal } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -19,7 +19,17 @@ interface iAppProps {
     channelId: string;
 }
 
+function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 export function MessageInputForm({ channelId }: iAppProps) {
+    const queryClient = useQueryClient();
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -37,6 +47,8 @@ export function MessageInputForm({ channelId }: iAppProps) {
                 form.reset({ channelId, content: "" });
                 setImageFile(null);
                 setImagePreview(null);
+                toast.success("Message sent!");
+                queryClient.invalidateQueries({ queryKey: orpc.message.list.queryKey({ input: { channelId } }) });
             },
             onError: (error) => {
                 toast.error(`Failed to send message: ${error.message}`);
@@ -54,11 +66,22 @@ export function MessageInputForm({ channelId }: iAppProps) {
         }
     }
 
-    function onSubmit(values: MessageFormValues) {
-        const text = values.content.replace(/<[^>]*>/g, "").trim();
-        if (!text && !imageFile) return;
-        // TODO: upload imageFile to storage and set values.imageUrl before mutating
-        createMessageMutation.mutate(values);
+    async function onSubmit(values: MessageFormValues) {
+        // Strip tags only to check if there's actual content — send the original HTML
+        const plainText = values.content.replace(/<[^>]*>/g, "").trim();
+        if (!plainText && !imageFile) return;
+
+        let imageUrl: string | undefined;
+        if (imageFile) {
+            try {
+                imageUrl = await fileToBase64(imageFile);
+            } catch {
+                toast.error("Failed to process image. Please try again.");
+                return;
+            }
+        }
+
+        createMessageMutation.mutate({ ...values, imageUrl });
     }
 
     function handleKeyDown(e: React.KeyboardEvent) {
