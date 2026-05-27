@@ -1,9 +1,9 @@
 'use client'
 
-import { EditorContent, useEditor } from '@tiptap/react';
+import { Editor, EditorContent } from '@tiptap/react';
 import { editorExtensions } from './extensions';
 import { MenuBar } from './MenuBar';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Paperclip, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -17,22 +17,34 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ value, onChange, onImageChange, imagePreview }: RichTextEditorProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const editorRef = useRef<Editor | null>(null);
+    const [, forceUpdate] = useState(0);
 
-    const handleUpdate = useCallback(({ editor }: { editor: any }) => {
+    const handleUpdate = useCallback(({ editor }: { editor: Editor }) => {
         onChange?.(editor.getHTML());
     }, [onChange]);
 
-    const editor = useEditor({
-        immediatelyRender: false,
-        extensions: editorExtensions,
-        content: value,
-        onUpdate: handleUpdate,
-        editorProps: {
-            attributes: {
-                class: 'max-w-none min-h-[125px] focus:outline-none p-4 !w-full !max-w-none prose dark:prose-invert marker:text-primary',
+    useEffect(() => {
+        const instance = new Editor({
+            extensions: editorExtensions,
+            content: value,
+            onUpdate: handleUpdate,
+            editorProps: {
+                attributes: {
+                    class: 'max-w-none min-h-[125px] focus:outline-none p-4 !w-full !max-w-none prose dark:prose-invert marker:text-primary',
+                }
             }
-        }
-    });
+        });
+
+        editorRef.current = instance;
+        forceUpdate(n => n + 1);
+
+        return () => {
+            instance.destroy();
+            editorRef.current = null;
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0] ?? null;
@@ -42,10 +54,9 @@ export function RichTextEditor({ value, onChange, onImageChange, imagePreview }:
 
     return (
         <div className='relative w-full border border-input rounded-lg overflow-hidden dark:bg-input/30 flex flex-col'>
-            <MenuBar editor={editor} />
-            <EditorContent editor={editor} className='max-h-[200px] overflow-y-auto' />
+            <MenuBar editor={editorRef.current} />
+            <EditorContent editor={editorRef.current} className='max-h-[200px] overflow-y-auto' />
 
-            {/* Image preview */}
             {imagePreview && (
                 <div className='px-4 pb-2 flex items-center gap-2'>
                     <div className='relative inline-flex'>
@@ -65,7 +76,6 @@ export function RichTextEditor({ value, onChange, onImageChange, imagePreview }:
                 </div>
             )}
 
-            {/* Footer */}
             <div className='border-t border-input px-2 py-1 flex items-center'>
                 <TooltipProvider>
                     <Tooltip>

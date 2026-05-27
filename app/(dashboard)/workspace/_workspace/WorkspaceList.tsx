@@ -5,8 +5,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { orpc } from "@/lib/orpc";
 import { cn } from "@/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const colorCombinations = [
     'bg-blue-500 hover:bg-blue-600 text-white',
@@ -26,29 +25,28 @@ const getWorkspaceColor = (id: string) => {
 
 export function WorkspaceList() {
     const { data: { workspaces, currentWorkspace } } = useSuspenseQuery(orpc.workspace.list.queryOptions())
-    const router = useRouter();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    const [isPending, setIsPending] = useState(false);
 
     const handleWorkspaceSwitch = (orgCode: string) => {
-        if (!mounted) return;
-        const loginUrl = `/api/auth/login?org_code=${orgCode}&post_login_redirect_url=/workspace/${orgCode}`;
-        router.push(loginUrl);
+        if (!orgCode || isPending) return;
+        setIsPending(true);
+        // Use a full browser navigation instead of client-side routing so that:
+        // 1. The Kinde auth redirect is handled correctly and the session cookie is committed
+        // 2. The React Query cache is fully cleared, preventing stale data from the old workspace
+        window.location.href = `/api/auth/login?org_code=${orgCode}&post_login_redirect_url=/workspace/${orgCode}`;
     };
 
     return (
         <TooltipProvider>
             <div className="flex flex-col gap-2">
                 {workspaces.map((workspace) => {
-                    const isActive = currentWorkspace.orgCode === workspace.id;
+                    const isActive = currentWorkspace?.orgCode === workspace.id;
                     return (
                         <Tooltip key={workspace.id}>
                             <TooltipTrigger asChild>
                                 <Button
                                     size="icon"
+                                    disabled={isPending}
                                     onClick={() => handleWorkspaceSwitch(workspace.id)}
                                     className={cn(
                                         'size-12 transition-all duration-200',
