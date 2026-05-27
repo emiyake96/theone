@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { orpc } from "@/lib/orpc";
 import { toast } from "sonner";
+import { useParams, useRouter } from "next/navigation";
 
 type ChannelFormValues = {
   name: string;
@@ -32,6 +33,8 @@ type ChannelFormValues = {
 export function CreateNewChannel() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient()
+  const router = useRouter();
+  const { workspaceid } = useParams<{ workspaceid: string }>();
   const form = useForm<ChannelFormValues>({
     resolver: zodResolver(channelSchema),
     defaultValues: {
@@ -48,6 +51,9 @@ export function CreateNewChannel() {
         })
         form.reset();
         setOpen(false);
+        router.push(`/workspace/${workspaceid}/channel/${newChannel.id}`);
+
+
       },
       onError: (error) => {
         toast.error(`Failed to create channel: ${error.message}`);
