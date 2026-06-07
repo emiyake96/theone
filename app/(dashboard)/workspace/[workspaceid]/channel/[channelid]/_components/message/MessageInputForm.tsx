@@ -4,7 +4,7 @@ import { createMessageSchema } from "@/app/schemas/message";
 import { RichTextEditor } from "@/components/rich-text-editor/Editor";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup } from "@/components/ui/field";
-import { orpc } from "@/lib/orpc";
+import { messagesQueryKey } from "../MessageList";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SendHorizonal } from "lucide-react";
@@ -12,6 +12,7 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { orpc } from "@/lib/orpc";
 
 type MessageFormValues = z.infer<typeof createMessageSchema>;
 
@@ -48,7 +49,7 @@ export function MessageInputForm({ channelId }: iAppProps) {
                 setImageFile(null);
                 setImagePreview(null);
                 toast.success("Message sent!");
-                queryClient.invalidateQueries({ queryKey: orpc.message.list.queryKey({ input: { channelId } }) });
+                queryClient.invalidateQueries({ queryKey: messagesQueryKey(channelId) });
             },
             onError: (error) => {
                 toast.error(`Failed to send message: ${error.message}`);

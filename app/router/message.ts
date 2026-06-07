@@ -1,5 +1,5 @@
 import z from 'zod';
-import {  requiredAuthMiddleware } from '../middlewares/auth';
+import { requiredAuthMiddleware } from '../middlewares/auth';
 import { base } from '../middlewares/base';
 import { requireWorkspaceMiddleware } from '../middlewares/workspace';
 import prisma from '@/lib/db';
@@ -42,9 +42,7 @@ export const createMessage = base
             }
         })
 
-        return {
-            ...created
-        }
+        return { ...created }
     })
 
 export const listMessages = base
@@ -55,8 +53,16 @@ export const listMessages = base
         path: "/messages",
         summary: "List messages in a channel",
         tags: ["Messages"],
-    }).input(z.object({ channelId: z.string() }))
-    .output(z.array(z.custom<Message>()))
+    })
+    .input(z.object({
+        channelId: z.string(),
+        cursor: z.string().optional(), // ISO timestamp — load messages older than this
+        limit: z.number().int().min(1).max(100).default(30),
+    }))
+    .output(z.object({
+        messages: z.array(z.custom<Message>()),
+        nextCursor: z.string().optional(),
+    }))
     .handler(async({ input, context }) => {
         const channel = await prisma.channel.findFirst({
             where: {
@@ -69,14 +75,23 @@ export const listMessages = base
             throw new Error("Channel not found");
         }
 
-        const messages = await prisma.message.findMany({
+        // Fetch one extra to determine whether another page exists
+        const raw = await prisma.message.findMany({
             where: {
                 channelId: input.channelId,
+                ...(input.cursor ? { createdAt: { lt: new Date(input.cursor) } } : {}),
             },
-            orderBy: {
-                createdAt: "asc",
-            }
+            orderBy: { createdAt: "desc" },
+            take: input.limit + 1,
         })
 
-        return messages
+        let nextCursor: string | undefined
+        if (raw.length > input.limit) {
+            nextCursor = raw.pop()!.createdAt.toISOString()
+        }
+
+        return {
+            messages: raw.reverse(), // chronological order for display
+            nextCursor,
+        }
     })
