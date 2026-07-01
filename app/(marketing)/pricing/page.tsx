@@ -44,7 +44,7 @@ const plans = [
 
 const faqs = [
     {
-        question: 'Can I use theone for free?',
+        question: 'Can I use Clair for free?',
         answer: 'Yes — the Free plan includes all core messaging features with no time limit. You only need to upgrade if you want AI-powered features.',
     },
     {
