@@ -65,7 +65,7 @@ export default function AboutPage() {
                         Built for teams that move fast
                     </h1>
                     <p className="mt-6 text-lg text-muted-foreground text-balance max-w-2xl mx-auto">
-                        theone is a modern team communication platform that combines real-time messaging with AI tools — so your team can focus on the work, not the noise.
+                        Clair is a modern team communication platform that combines real-time messaging with AI tools — so your team can focus on the work, not the noise.
                     </p>
                 </section>
 
@@ -75,10 +75,10 @@ export default function AboutPage() {
                         <div>
                             <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">Our mission</h2>
                             <p className="mt-4 text-muted-foreground leading-relaxed">
-                                Most team chat tools were built before AI existed. We built theone from the ground up with AI as a first-class feature — not an afterthought. Summarize long threads, proofread messages, and stay in sync without spending hours reading back through channels.
+                                Most team chat tools were built before AI existed. We built Clair from the ground up with AI as a first-class feature — not an afterthought. Summarize long threads, proofread messages, and stay in sync without spending hours reading back through channels.
                             </p>
                             <p className="mt-4 text-muted-foreground leading-relaxed">
-                                Communication should feel effortless. theone gets out of your way and lets your team do their best work.
+                                Communication should feel effortless. Clair gets out of your way and lets your team do their best work.
                             </p>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -139,7 +139,7 @@ export default function AboutPage() {
                             Ready to get started?
                         </h2>
                         <p className="text-muted-foreground max-w-md mx-auto">
-                            Join teams already using theone to communicate faster and smarter.
+                            Join teams already using Clair to communicate faster and smarter.
                         </p>
                         <div className="flex items-center justify-center gap-3 flex-wrap">
                             <RegisterLink>
