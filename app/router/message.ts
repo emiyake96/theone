@@ -37,8 +37,8 @@ export const createMessage = base
                 channelId: input.channelId,
                 parentId: input.parentId ?? null,
                 authorId: context.user.id,
-                authorEmail: context.user.email,
-                authorName: context.user.given_name,
+                authorEmail: context.user.email ?? '',
+                authorName: context.user.given_name ?? '',
                 authorAvatar: getAvatar(context.user.picture, context.user.email!),
             }
         })

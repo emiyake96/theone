@@ -30,7 +30,7 @@ ${plainText}`;
         const { text } = await generateText({
             model: openrouter("anthropic/claude-3-haiku"),
             prompt,
-            maxTokens: 500,
+            maxOutputTokens: 500,
         });
 
         return Response.json({ proofread: text.trim() });

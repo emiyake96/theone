@@ -64,7 +64,7 @@ export function MenuBar({ editor }: MenuBarProps) {
 
     function acceptSuggestion() {
         if (!editor || !suggestion) return
-        editor.commands.setContent(`<p>${suggestion}</p>`, true)
+        editor.commands.setContent(`<p>${suggestion}</p>`)
         setSuggestion(null)
     }
 

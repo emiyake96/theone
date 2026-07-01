@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         const { text } = await generateText({
             model: openrouter("anthropic/claude-3-haiku"),
             prompt,
-            maxTokens: 150,
+            maxOutputTokens: 150,
         });
 
         return Response.json({ summary: text.trim() });
