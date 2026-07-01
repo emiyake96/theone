@@ -38,6 +38,8 @@ export function MessageList({ onEditingChange }: { onEditingChange?: (editing: b
             }),
         getNextPageParam: (lastPage) => lastPage.nextCursor,
         initialPageParam: undefined as string | undefined,
+        refetchInterval: 3000,
+        refetchIntervalInBackground: false,
     })
 
     // Pages come in newest-first order; reverse so oldest pages render at the top

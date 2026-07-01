@@ -5,6 +5,7 @@ import { UserNav } from './_components/UserNav'
 import { orpc } from '@/lib/orpc'
 import { getQueryClient, HydrateClient } from '@/lib/query/hydration'
 import { Suspense } from 'react'
+import { PresenceHeartbeat } from '@/components/PresenceHeartbeat'
 
 const WorkspaceLayout = async({ children }: { children: React.ReactNode }) => {
   const queryClient = getQueryClient()
@@ -13,6 +14,7 @@ const WorkspaceLayout = async({ children }: { children: React.ReactNode }) => {
   
   return (
     <div className='flex w-full h-screen'>
+      <PresenceHeartbeat />
       <div className='flex h-full w-16 flex-col items-center bg-secondary py-3 px-2 border-r border-border'>
         <HydrateClient client={queryClient}>
           <Suspense fallback={<div className="flex flex-col gap-2">

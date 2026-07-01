@@ -68,6 +68,13 @@ model Reaction {
   @@unique([userId, messageId, emoji])
 }
 
+model UserPresence {
+  userId   String   @id
+  lastSeen DateTime @default(now())
+
+  @@index([lastSeen])
+}
+
 model StripeCustomer {
   id        String   @id @default(uuid())
   userId    String   @unique

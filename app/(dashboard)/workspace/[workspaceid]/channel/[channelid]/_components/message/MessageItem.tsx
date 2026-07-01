@@ -190,13 +190,15 @@ export function MessageItem({
         <div className="group">
             {/* Main message */}
             <div className="flex space-x-3 relative p-3 rounded-lg group-hover:bg-muted/50">
-                {authorAvatar ? (
-                    <Image src={authorAvatar} alt={authorName ?? 'User'} width={32} height={32} className="size-8 rounded-lg shrink-0" />
-                ) : (
-                    <div className="size-8 rounded-lg bg-muted shrink-0 flex items-center justify-center text-xs font-semibold">
-                        {authorName?.charAt(0).toUpperCase() ?? '?'}
-                    </div>
-                )}
+                <div className="relative shrink-0 size-8 self-start">
+                    {authorAvatar ? (
+                        <Image src={authorAvatar} alt={authorName ?? 'User'} width={32} height={32} className="size-8 rounded-lg" />
+                    ) : (
+                        <div className="size-8 rounded-lg bg-muted flex items-center justify-center text-xs font-semibold">
+                            {authorName?.charAt(0).toUpperCase() ?? '?'}
+                        </div>
+                    )}
+                </div>
                 <div className="flex-1 space-y-1 min-w-0">
                     <div className="flex items-center gap-x-2">
                         <p className="font-medium leading-none">{authorName ?? 'Unknown'}</p>

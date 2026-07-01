@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { toast } from "sonner"
 import { UserPlus, Users } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export function WorkspaceHeader() {
     const { data: { currentWorkspace, members } } = useSuspenseQuery(orpc.channel.list.queryOptions())
@@ -38,13 +39,19 @@ export function WorkspaceHeader() {
         <div className="flex items-center justify-between w-full min-w-0">
             <h2 className='text-lg font-semibold truncate'>{workspaceName}</h2>
             <div className="flex items-center gap-1 ml-2 shrink-0">
+                <TooltipProvider>
                 {/* Invite Members */}
                 <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
                     <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-8">
+                        <Button variant="ghost" size="icon" className="size-8 hover:bg-accent hover:text-accent-foreground">
                             <UserPlus className="size-4" />
                         </Button>
                     </DialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Add member</p></TooltipContent>
+                    </Tooltip>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>Invite Member</DialogTitle>
@@ -72,11 +79,16 @@ export function WorkspaceHeader() {
 
                 {/* View Members */}
                 <Dialog open={membersOpen} onOpenChange={setMembersOpen}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
                     <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="size-8">
+                        <Button variant="ghost" size="icon" className="size-8 hover:bg-accent hover:text-accent-foreground">
                             <Users className="size-4" />
                         </Button>
                     </DialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent><p>View members</p></TooltipContent>
+                    </Tooltip>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle>{workspaceName}</DialogTitle>
@@ -98,6 +110,7 @@ export function WorkspaceHeader() {
                         </div>
                     </DialogContent>
                 </Dialog>
+                </TooltipProvider>
             </div>
         </div>
     )

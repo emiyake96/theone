@@ -1,11 +1,12 @@
 'use client'
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, Sun, Moon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import React from 'react'
 import { cn } from '@/lib/utils'
 import {RegisterLink, LoginLink, LogoutLink} from "@kinde-oss/kinde-auth-nextjs/components";
 import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs'
+import { useTheme } from 'next-themes'
 
 const menuItems = [
     { name: 'Pricing', href: '/pricing' },
@@ -17,6 +18,7 @@ export const HeroHeader = () => {
     const [isScrolled, setIsScrolled] = React.useState(false)
     const {getUser, isLoading, isAuthenticated} = useKindeBrowserClient()
     const user = getUser()
+    const { theme, setTheme } = useTheme()
 
     React.useEffect(() => {
         const handleScroll = () => {
@@ -77,6 +79,14 @@ export const HeroHeader = () => {
                                     ))}
                                 </ul>
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                                aria-label="Toggle theme">
+                                <Sun className="size-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                                <Moon className="absolute size-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                            </Button>
                             {isLoading ? null : (
                                 <>
                                 <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">

@@ -174,10 +174,10 @@ export function MenuBar({ editor }: MenuBarProps) {
                                         ? <Loader2 className='size-3.5 animate-spin' />
                                         : <SparklesSnake className='size-3.5 text-muted-foreground' active={proofreadHovered} />
                                     }
-                                    {proofreadLoading ? 'Proofreading…' : 'Proofread'}
+                                    {proofreadLoading ? 'Composing…' : 'Compose'}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent><p>AI Proofread</p></TooltipContent>
+                            <TooltipContent><p>AI Compose</p></TooltipContent>
                         </Tooltip>
                     </div>
                 </TooltipProvider>
