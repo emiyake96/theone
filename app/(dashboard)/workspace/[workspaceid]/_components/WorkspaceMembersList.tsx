@@ -53,7 +53,7 @@ function formatLastSeen(lastSeenIso: string | undefined, isOnline: boolean): str
 }
 
 type Member = {
-    id: string
+    id?: string | null
     full_name?: string | null
     email?: string | null
     picture?: string | null
@@ -121,7 +121,7 @@ export function WorkspaceMembersList() {
         <>
         <div className='space-y-0.5 py-1'>
             {members.map((member) => {
-                const isOnline = onlineUserIds.includes(member.id)
+                const isOnline = !!member.id && onlineUserIds.includes(member.id)
                 return (
                     <div
                         key={member.id}
@@ -151,8 +151,8 @@ export function WorkspaceMembersList() {
         {selectedMember && (
             <MemberProfileModal
                 member={selectedMember}
-                isOnline={onlineUserIds.includes(selectedMember.id)}
-                lastSeenIso={lastSeenMap[selectedMember.id]}
+                isOnline={!!selectedMember.id && onlineUserIds.includes(selectedMember.id)}
+                lastSeenIso={selectedMember.id ? lastSeenMap[selectedMember.id] : undefined}
                 open={!!selectedMember}
                 onClose={() => setSelectedMember(null)}
             />
