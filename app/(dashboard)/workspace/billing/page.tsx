@@ -26,7 +26,7 @@ async function getBillingData(userId: string) {
         last4: card?.last4,
         cardBrand: card?.brand,
         invoices: invoices.data.map(inv => ({
-            id: inv.id,
+            id: inv.id ?? '',
             date: new Date((inv.created) * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
             amount: inv.amount_paid ? `$${(inv.amount_paid / 100).toFixed(2)}` : '$0.00',
             status: inv.status === 'paid' ? 'Paid' : inv.status ?? 'Unknown',
