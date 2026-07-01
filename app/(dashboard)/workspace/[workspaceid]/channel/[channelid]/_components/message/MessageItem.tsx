@@ -230,7 +230,7 @@ export function MessageItem({
                             {showSummary && (
                                 <div className="mt-2 rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm max-w-prose">
                                     <div className="flex items-center gap-1.5 mb-1 text-xs font-medium text-primary">
-                                        <Sparkles className="size-3" />
+                                        <SparklesSnake className="size-3" active={true} />
                                         AI Summary
                                     </div>
                                     {summaryLoading && (
