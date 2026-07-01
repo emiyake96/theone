@@ -1,8 +1,8 @@
 'use client'
 
-import { useInfiniteQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { MessageItem } from "./message/MessageItem"
-import { client } from "@/lib/orpc"
+import { client, orpc } from "@/lib/orpc"
 import { useParams } from "next/navigation"
 import { useEffect, useRef, useCallback } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -13,8 +13,9 @@ const PAGE_SIZE = 30
 // Shared key used by MessageList and MessageInputForm for invalidation
 export const messagesQueryKey = (channelId: string) => ['messages', channelId] as const
 
-export function MessageList() {
+export function MessageList({ onEditingChange }: { onEditingChange?: (editing: boolean) => void }) {
     const { channelid } = useParams<{ channelid: string }>()
+    const { data: { user } } = useSuspenseQuery(orpc.workspace.list.queryOptions())
     const scrollRef = useRef<HTMLDivElement>(null)
     const sentinelRef = useRef<HTMLDivElement>(null)
     const isFirstLoad = useRef(true)
@@ -161,9 +162,16 @@ export function MessageList() {
                         id={message.id}
                         content={message.content}
                         createdAt={new Date(message.createdAt)}
+                        editedAt={message.editedAt ? new Date(message.editedAt) : null}
                         authorAvatar={message.authorAvatar ?? null}
                         authorName={message.authorName}
+                        authorId={message.authorId}
+                        currentUserId={user?.id ?? null}
                         imageUrl={message.imageUrl ?? null}
+                        channelId={channelid}
+                        replies={(message as any).replies ?? []}
+                        reactions={(message as any).reactions ?? []}
+                        onEditingChange={onEditingChange}
                     />
                 ))}
             </div>

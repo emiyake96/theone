@@ -1,6 +1,7 @@
 'use client'
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CreditCard, LogOut, Settings, User } from "lucide-react";
@@ -8,20 +9,20 @@ import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs";
 import { PortalLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { orpc } from "@/lib/orpc";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { getAvatar } from "@/lib/get-avatar";
 
-const UserAvatar = {
-  src: "https://avatars.githubusercontent.com/u/108645313?v=4",
-  alt: "User avatar"
-};
 export function UserNav() {
   const { data : { user } } = useSuspenseQuery(orpc.workspace.list.queryOptions())
+  const avatarSrc = getAvatar(user?.picture ?? null, user?.email ?? null)
+  const initials = user?.given_name?.charAt(0).toUpperCase() ?? user?.email?.charAt(0).toUpperCase() ?? '?'
+
   return (
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='outline' size='icon' className="size-12 rounded-xl hover:rounded-lg transition-all duration-200 bg-background/50 border-border/50 hover:bg-accent">
             <Avatar className="h-8 w-8">
-              <AvatarImage src={UserAvatar.src} alt={UserAvatar.alt} />
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarImage src={avatarSrc} alt={user?.given_name ?? 'User'} />
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
@@ -37,9 +38,11 @@ export function UserNav() {
               Profile
             </PortalLink>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <CreditCard />
-            Billing
+          <DropdownMenuItem asChild>
+            <Link href="/workspace/billing">
+              <CreditCard />
+              Billing
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Settings />

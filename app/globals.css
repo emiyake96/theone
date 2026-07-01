@@ -124,6 +124,7 @@
   }
 }
 
+
 .tiptap p.is-editor-empty:first-child::before {
   color: hsl(var(--color-muted-foreground));
   content: attr(data-placeholder);

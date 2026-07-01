@@ -5,7 +5,7 @@ import { requireWorkspaceMiddleware } from '../middlewares/workspace';
 import prisma from '@/lib/db';
 import { createMessageSchema } from '../schemas/message';
 import { getAvatar } from '@/lib/get-avatar';
-import { Message } from '@/lib/generated/prisma/edge';
+import { Message, Reaction } from '@/lib/generated/prisma/edge';
 
 
 export const createMessage = base
@@ -35,6 +35,7 @@ export const createMessage = base
                 content: input.content,
                 imageUrl: input.imageUrl,
                 channelId: input.channelId,
+                parentId: input.parentId ?? null,
                 authorId: context.user.id,
                 authorEmail: context.user.email,
                 authorName: context.user.given_name,
@@ -43,6 +44,49 @@ export const createMessage = base
         })
 
         return { ...created }
+    })
+
+export const toggleReaction = base
+    .use(requiredAuthMiddleware)
+    .use(requireWorkspaceMiddleware)
+    .route({ method: "POST", path: "/messages/{id}/reactions", tags: ["Messages"] })
+    .input(z.object({ messageId: z.string(), emoji: z.string() }))
+    .output(z.object({ added: z.boolean() }))
+    .handler(async ({ input, context }) => {
+        const existing = await prisma.reaction.findUnique({
+            where: { userId_messageId_emoji: { userId: context.user.id, messageId: input.messageId, emoji: input.emoji } }
+        })
+        if (existing) {
+            await prisma.reaction.delete({ where: { id: existing.id } })
+            return { added: false }
+        }
+        await prisma.reaction.create({
+            data: { emoji: input.emoji, userId: context.user.id, messageId: input.messageId }
+        })
+        return { added: true }
+    })
+
+export const editMessage = base
+    .use(requiredAuthMiddleware)
+    .use(requireWorkspaceMiddleware)
+    .route({
+        method: "PATCH",
+        path: "/messages/{id}",
+        summary: "Edit a message",
+        tags: ["Messages"],
+    })
+    .input(z.object({ id: z.string(), content: z.string().min(1) }))
+    .output(z.custom<Message>())
+    .handler(async ({ input, context }) => {
+        const message = await prisma.message.findFirst({
+            where: { id: input.id, authorId: context.user.id }
+        })
+        if (!message) throw new Error("Message not found or not yours")
+
+        return prisma.message.update({
+            where: { id: input.id },
+            data: { content: input.content, editedAt: new Date() }
+        })
     })
 
 export const listMessages = base
@@ -79,7 +123,15 @@ export const listMessages = base
         const raw = await prisma.message.findMany({
             where: {
                 channelId: input.channelId,
+                parentId: null, // only top-level messages
                 ...(input.cursor ? { createdAt: { lt: new Date(input.cursor) } } : {}),
+            },
+            include: {
+                replies: {
+                    orderBy: { createdAt: "asc" },
+                    include: { reactions: true },
+                },
+                reactions: true,
             },
             orderBy: { createdAt: "desc" },
             take: input.limit + 1,

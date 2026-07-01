@@ -57,14 +57,16 @@ export const createChannel = base
             }
         }),
         (async () => {
-        init()
-
-        const usersInOrg = await Organizations.getOrganizationUsers({
-            orgCode: context.workspace.orgCode,
-            sort: 'name_asc'
-        })
-
-        return usersInOrg.organization_users ?? [];
+        try {
+            init()
+            const usersInOrg = await Organizations.getOrganizationUsers({
+                orgCode: context.workspace.orgCode,
+                sort: 'name_asc'
+            })
+            return usersInOrg.organization_users ?? [];
+        } catch {
+            return [];
+        }
         })(),
     ])
 
