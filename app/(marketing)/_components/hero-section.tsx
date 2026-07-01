@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { ArrowRight, Bolt, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { RegisterLink } from '@kinde-oss/kinde-auth-nextjs/components'
 import Image from 'next/image'
 import { AnimatedGroup } from '@/components/motion-primitives/animated-group'
 import { TextEffect } from '@/components/motion-primitives/text-effect'
-import { HeroHeader } from "@/app/(marketing)/_components/header"
 import VercelLogoDark from '@/public/assets/logos/Vercel_wordmark_dark.svg'
 import MotionLogoDark from '@/public/assets/logos/Motion_dark.svg'
 import NeonLogo from '@/public/assets/logos/neon.svg'
@@ -37,7 +37,6 @@ const transitionVariants = {
 export default function HeroSection() {
     return (
         <>
-            <HeroHeader />
             <main className="overflow-hidden">
                 <div
                     aria-hidden
@@ -92,7 +91,7 @@ export default function HeroSection() {
                             <div className="text-center sm:mx-auto lg:mr-auto lg:mt-0">
                                 <AnimatedGroup variants={transitionVariants}>
                                     <Link
-                                        href="#link"
+                                        href="/about"
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-4 rounded-full border p-1 pl-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                                         <span className="text-foreground text-sm">Introducing new AI features</span>
                                         <span className="dark:border-background block h-4 w-0.5 border-l bg-white dark:bg-zinc-700"></span>
@@ -143,25 +142,14 @@ export default function HeroSection() {
                                     <div
                                         key={1}
                                         className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5">
-                                        <Button
-                                            asChild
-                                            size="lg"
-                                            className="rounded-xl px-5 text-base">
-                                            <Link href="#link">
+                                        <RegisterLink>
+                                            <Button
+                                                size="lg"
+                                                className="rounded-xl px-5 text-base">
                                                 <span className="text-nowrap">Get Started</span>
-                                            </Link>
-                                        </Button>
+                                            </Button>
+                                        </RegisterLink>
                                     </div>
-                                    <Button
-                                        key={2}
-                                        asChild
-                                        size="lg"
-                                        variant="secondary"
-                                        className="h-10.5 rounded-xl px-5">
-                                        <Link href="#link">
-                                            <span className="text-nowrap">Request a demo</span>
-                                        </Link>
-                                    </Button>
                                 </AnimatedGroup>
                             </div>
                         </div>
@@ -181,18 +169,12 @@ export default function HeroSection() {
                             <div className="mask-b-from-55% relative -mr-56 mt-8 overflow-hidden px-2 sm:mr-0 sm:mt-12 md:mt-20">
                                 <div className="inset-shadow-2xs ring-background dark:inset-shadow-white/20 bg-background relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-4 shadow-lg shadow-zinc-950/15 ring-1">
                                     <Image
-                                        className="bg-background aspect-15/8 relative hidden rounded-2xl dark:block"
-                                        src="/mail2.png"
+                                        className="bg-background relative rounded-2xl w-full"
+                                        src="/app-dark.png"
                                         alt="app screen"
-                                        width="2700"
-                                        height="1440"
-                                    />
-                                    <Image
-                                        className="z-2 border-border/25 aspect-15/8 relative rounded-2xl border dark:hidden"
-                                        src="/mail2-light.png"
-                                        alt="app screen"
-                                        width="2700"
-                                        height="1440"
+                                        width="2600"
+                                        height="1272"
+                                        priority
                                     />
                                 </div>
                             </div>
@@ -205,53 +187,36 @@ export default function HeroSection() {
                             <Link
                                 href="/"
                                 className="block text-sm duration-150 hover:opacity-75">
-                                <span> Meet Our Customers</span>
+                                <span> How It Works</span>
 
                                 <ChevronRight className="ml-1 inline-block size-3" />
                             </Link>
                         </div>
-                        <div className="group-hover:blur-xs **:fill-foreground mx-auto mt-12 grid max-w-2xl grid-cols-3 gap-x-12 gap-y-8 transition-all duration-500 group-hover:opacity-50 sm:gap-x-16 sm:gap-y-14 md:grid-cols-4">
+                        <div className="group-hover:blur-xs mx-auto mt-12 grid max-w-2xl grid-cols-3 gap-x-12 gap-y-8 transition-all duration-500 group-hover:opacity-50 sm:gap-x-16 sm:gap-y-14 md:grid-cols-4">
                             <div className="flex items-center">
-                                <Image 
-                                className="h-8" src={VercelLogoDark} alt="Vercel" 
-                                />
+                                <Image className="h-8 invert dark:invert-0" src={VercelLogoDark} alt="Vercel" />
                             </div>
                             <div className="flex items-center">
-                                <Image 
-                                className="h-8 mx-auto" src={MotionLogoDark} alt="Motion" 
-                                />
+                                <Image className="h-8 mx-auto invert dark:invert-0" src={MotionLogoDark} alt="Motion" />
                             </div>
                             <div className="flex items-center">
-                                <Image 
-                                className="h-8 mx-auto" src={NeonLogo} alt="Neon" 
-                                />
+                                <Image className="h-8 mx-auto invert dark:invert-0" src={NeonLogo} alt="Neon" />
                             </div>
                             <div className="flex items-center">
-                                <Image 
-                                className="h-8" src={NextLogo} alt="Next.js" 
-                                />
+                                <Image className="h-8 invert dark:invert-0" src={NextLogo} alt="Next.js" />
                             </div>
                             <div className="flex items-center">
-                                <Image 
-                                className="h-8 mx-auto" src={PrismaLogo} alt="Prisma" 
-                                />
+                                <Image className="h-8 mx-auto invert dark:invert-0" src={PrismaLogo} alt="Prisma" />
                             </div>
                             <div className="flex items-center">
-                                <Image 
-                                className="h-8 mx-auto" src={OpenAILogo} alt="OpenAI" 
-                                />
+                                <Image className="h-8 mx-auto invert dark:invert-0" src={OpenAILogo} alt="OpenAI" />
                             </div>
                             <div className="flex items-center">
-                                <Image 
-                                className="h-8 w-fit invert mx-auto " src={Kinde} alt="Kinde" 
-                                />
+                                <Image className="h-8 w-fit mx-auto dark:invert" src={Kinde} alt="Kinde" />
                             </div>
                             <div className="flex items-center">
-                                <Image 
-                                className=" w-fit invert mx-auto h-fit" src={Arcjet} alt="Arcjet" 
-                                />
+                                <Image className="h-fit w-fit mx-auto dark:invert" src={Arcjet} alt="Arcjet" />
                             </div>
-
                         </div>
                     </div>
                 </section>
