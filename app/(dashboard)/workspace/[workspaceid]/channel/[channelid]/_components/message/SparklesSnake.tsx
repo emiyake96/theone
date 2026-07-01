@@ -22,8 +22,8 @@ interface Props {
 
 export function SparklesSnake({ className, active }: Props) {
   const svgRef = useRef<SVGSVGElement>(null)
-  const rafRef = useRef<number>()
-  const t0Ref = useRef<number>()
+  const rafRef = useRef<number | undefined>(undefined)
+  const t0Ref = useRef<number | undefined>(undefined)
 
   useEffect(() => {
     const svg = svgRef.current
