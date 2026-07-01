@@ -42,13 +42,9 @@ export function CreateWorkspace() {
     orpc.workspace.create.mutationOptions({
       onSuccess: (newWorkspace) => {
         toast.success(`Workspace ${newWorkspace.workspaceName} created successfully!`);
-
-      queryClient.invalidateQueries({
-        queryKey: orpc.workspace.list.queryKey(),
-      })
-
-      form.reset()
-      setOpen(false)
+        form.reset()
+        setOpen(false)
+        window.location.href = `/api/auth/login?post_login_redirect_url=/workspace`;
       },
 
       onError: (error) => {

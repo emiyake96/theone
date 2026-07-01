@@ -6,7 +6,7 @@ const aj = arcjet({
     key: process.env.ARCJET_KEY!, // Get your site key from https://app.arcjet.com
     rules: [
         detectBot({
-            mode: "LIVE", // Blocks requests. Use "DRY_RUN" to log only
+            mode: "DRY_RUN", // Blocks requests. Use "DRY_RUN" to log only
             allow: [], // Block all bots. See https://arcjet.com/bot-list
         }),
     ],

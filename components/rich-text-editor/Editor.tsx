@@ -13,9 +13,10 @@ interface RichTextEditorProps {
     onChange?: (value: string) => void;
     onImageChange?: (file: File | null) => void;
     imagePreview?: string | null;
+    clearTrigger?: number;
 }
 
-export function RichTextEditor({ value, onChange, onImageChange, imagePreview }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, onImageChange, imagePreview, clearTrigger }: RichTextEditorProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const editorRef = useRef<Editor | null>(null);
     const [, forceUpdate] = useState(0);
@@ -45,6 +46,12 @@ export function RichTextEditor({ value, onChange, onImageChange, imagePreview }:
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    useEffect(() => {
+        if (clearTrigger && editorRef.current) {
+            editorRef.current.commands.clearContent(true)
+        }
+    }, [clearTrigger])
 
     function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0] ?? null;

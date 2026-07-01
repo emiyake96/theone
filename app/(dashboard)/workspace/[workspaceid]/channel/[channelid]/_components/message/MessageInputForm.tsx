@@ -33,6 +33,7 @@ export function MessageInputForm({ channelId }: iAppProps) {
     const queryClient = useQueryClient();
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [clearTrigger, setClearTrigger] = useState(0);
 
     const form = useForm<MessageFormValues>({
         resolver: zodResolver(createMessageSchema),
@@ -46,6 +47,7 @@ export function MessageInputForm({ channelId }: iAppProps) {
         orpc.message.create.mutationOptions({
             onSuccess: () => {
                 form.reset({ channelId, content: "" });
+                setClearTrigger(n => n + 1);
                 setImageFile(null);
                 setImagePreview(null);
                 toast.success("Message sent!");
@@ -104,6 +106,7 @@ export function MessageInputForm({ channelId }: iAppProps) {
                                 onChange={field.onChange}
                                 onImageChange={handleImageChange}
                                 imagePreview={imagePreview}
+                                clearTrigger={clearTrigger}
                             />
                             {fieldState.invalid && (
                                 <FieldError errors={[fieldState.error]} />

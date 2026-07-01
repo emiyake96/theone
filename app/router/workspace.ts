@@ -6,11 +6,10 @@ import { base } from "../middlewares/base";
 import { requiredAuthMiddleware } from "../middlewares/auth";
 import { requireWorkspaceMiddleware } from "../middlewares/workspace";
 import { workspaceSchema } from "../schemas/workspace";
-import { init, Organizations } from "@kinde/management-api-js"
+import { init, Organizations, Users } from "@kinde/management-api-js"
 
 export const listWorkspaces = base
 .use(requiredAuthMiddleware)
-.use(requireWorkspaceMiddleware)
     .route({
         method: "GET",
         path: "/workspaces",
@@ -27,32 +26,47 @@ export const listWorkspaces = base
             })
         ),
         user: z.custom<KindeUser<Record<string, unknown>>>(),
-        currentWorkspace: z.custom<KindeOrganization<unknown>>()
-    } 
+        currentWorkspace: z.custom<KindeOrganization<unknown>>().optional().nullable()
+    }
     ))
     .handler(async ({ input, context, errors }) => {
-        const { getUserOrganizations } = getKindeServerSession();
+        const { getOrganization, getUserOrganizations } = getKindeServerSession();
 
-        const organizations = await getUserOrganizations();
+        const [organizations, currentWorkspace] = await Promise.all([
+            getUserOrganizations(),
+            getOrganization(),
+        ])
 
-        if (!organizations) {
-            throw errors.FORBIDDEN()
+        init()
+
+        const userOrgCodes = new Set(organizations?.orgCodes ?? [])
+
+        let allOrgs: { code: string, name: string }[] = []
+        try {
+            const result = await Organizations.getOrganizations({ pageSize: 100 })
+            allOrgs = (result?.organizations ?? [])
+                .filter((o: any) => userOrgCodes.has(o.code))
+                .map((o: any) => ({
+                    code: o.code,
+                    name: o.name ?? "My Workspace",
+                }))
+        } catch (e) {
+            console.log("[getOrganizations] error:", e)
         }
 
         return {
-            workspaces: organizations?.orgs.map((org) => ({
-                id: org.code,
-                name: org.name ?? "My Workspace",
-                avatar: org.name?.charAt(0).toUpperCase() ?? "M"// Placeholder avatar using the first letter of the organization name
+            workspaces: allOrgs.map((o) => ({
+                id: o.code,
+                name: o.name,
+                avatar: o.name.charAt(0).toUpperCase(),
             })),
             user: context.user,
-            currentWorkspace: context.workspace
+            currentWorkspace: currentWorkspace ?? null
         }
     });
 
     export const createWorkspaces = base
         .use(requiredAuthMiddleware)
-        .use(requireWorkspaceMiddleware)
             .route({
                 method: "POST",
                 path: "/workspaces",
@@ -100,13 +114,79 @@ export const listWorkspaces = base
                     throw errors.FORBIDDEN()
                 }
 
-                const { refreshTokens } = getKindeServerSession()
-                
-                await refreshTokens()
-
                 return {
                     orgCode: data.organization.code,
                     workspaceName: input.name,
-
                 }
         });
+
+    export const inviteMember = base
+        .use(requiredAuthMiddleware)
+        .use(requireWorkspaceMiddleware)
+            .route({
+                method: "POST",
+                path: "/workspaces/invite",
+                summary: "Invite a member to the workspace",
+                tags: ["Workspaces"],
+            })
+            .input(z.object({ email: z.string().email() }))
+            .output(z.object({ success: z.boolean() }))
+            .handler(async ({ input, context, errors }) => {
+                init()
+                const orgCode = context.workspace.orgCode
+
+                // Find existing user by email
+                let userId: string | undefined
+                try {
+                    const search = await Users.getUsers({ email: input.email })
+                    userId = search?.users?.[0]?.id
+                } catch {}
+
+                // Create user if they don't exist
+                if (!userId) {
+                    try {
+                        const created = await Users.createUser({
+                            requestBody: {
+                                identities: [{ type: 'email', details: { email: input.email } }]
+                            }
+                        })
+                        userId = created?.id
+                    } catch {
+                        throw errors.BAD_REQUEST({ message: "Failed to create user" })
+                    }
+                }
+
+                if (!userId) throw errors.BAD_REQUEST({ message: "Could not find or create user" })
+
+                try {
+                    await Organizations.addOrganizationUsers({
+                        orgCode,
+                        requestBody: { users: [{ id: userId }] }
+                    })
+                } catch {
+                    throw errors.FORBIDDEN({ message: "Failed to add user to workspace" })
+                }
+
+                return { success: true }
+            })
+
+    export const deleteWorkspace = base
+        .use(requiredAuthMiddleware)
+        .use(requireWorkspaceMiddleware)
+            .route({
+                method: "DELETE",
+                path: "/workspaces/{orgCode}",
+                summary: "Delete a workspace",
+                tags: ["Workspaces"],
+            })
+            .input(z.object({ orgCode: z.string() }))
+            .output(z.object({ success: z.boolean() }))
+            .handler(async ({ input, errors }) => {
+                init()
+                try {
+                    await Organizations.deleteOrganization({ orgCode: input.orgCode })
+                } catch {
+                    throw errors.FORBIDDEN({ message: "Failed to delete workspace" })
+                }
+                return { success: true }
+            })
