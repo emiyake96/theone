@@ -30,6 +30,7 @@ interface ReplyMessage {
     authorAvatar: string | null
     authorName: string | null
     authorId: string
+    imageUrl?: string | null
     reactions?: ReactionData[]
 }
 
@@ -98,6 +99,8 @@ export function MessageItem({
     const [editContent, setEditContent] = useState("")
     const [replyContent, setReplyContent] = useState("")
     const [replyEditContent, setReplyEditContent] = useState("")
+    const [replyImageFile, setReplyImageFile] = useState<File | null>(null)
+    const [replyImagePreview, setReplyImagePreview] = useState<string | null>(null)
     const [threadOpen, setThreadOpen] = useState(false)
     const [showPicker, setShowPicker] = useState(false)
     const [pickerTarget, setPickerTarget] = useState<string | null>(null) // null = main, else replyId
@@ -117,7 +120,7 @@ export function MessageItem({
     const openEdit = () => { setEditContent(content); setActiveEditor('edit'); onEditingChange?.(true) }
     const openReply = () => { setReplyContent(""); setActiveEditor('reply'); onEditingChange?.(true) }
     const openReplyEdit = (reply: ReplyMessage) => { setReplyEditContent(reply.content); setActiveEditor({ type: 'reply-edit', replyId: reply.id }); onEditingChange?.(true) }
-    const closeEditor = () => { setActiveEditor(null); setEditContent(""); setReplyContent(""); setReplyEditContent(""); onEditingChange?.(false) }
+    const closeEditor = () => { setActiveEditor(null); setEditContent(""); setReplyContent(""); setReplyEditContent(""); setReplyImageFile(null); setReplyImagePreview(null); onEditingChange?.(false) }
 
     const editing = activeEditor === 'edit'
     const replying = activeEditor === 'reply'
@@ -339,6 +342,7 @@ export function MessageItem({
                                     ) : (
                                         <>
                                             {reply.content && <div className="prose prose-sm dark:prose-invert max-w-none break-words mt-1 [&>p]:leading-snug [&>p:last-child]:mb-0" dangerouslySetInnerHTML={{ __html: reply.content }} />}
+                                            {reply.imageUrl && <img src={reply.imageUrl} alt="Attached image" className="max-h-48 max-w-xs rounded-lg border border-border object-cover mt-1" />}
                                             {reply.reactions && <ReactionBar reactions={reply.reactions} currentUserId={currentUserId} onToggle={(emoji) => reactionMutation.mutate({ messageId: reply.id, emoji })} />}
                                         </>
                                     )}
@@ -371,9 +375,33 @@ export function MessageItem({
             {/* Reply editor */}
             {replying && (
                 <div className="ml-11 pl-3 pb-3 space-y-2">
-                    <RichTextEditor value={replyContent} onChange={setReplyContent} />
+                    <RichTextEditor
+                        value={replyContent}
+                        onChange={setReplyContent}
+                        onImageChange={(file) => {
+                            setReplyImageFile(file)
+                            setReplyImagePreview(file ? URL.createObjectURL(file) : null)
+                        }}
+                        imagePreview={replyImagePreview}
+                    />
                     <div className="flex gap-2 items-center">
-                        <Button size="sm" onClick={() => hasText(replyContent) && replyMutation.mutate({ channelId, content: replyContent, parentId: id })} disabled={!hasText(replyContent) || replyMutation.isPending}>
+                        <Button
+                            size="sm"
+                            disabled={(!hasText(replyContent) && !replyImageFile) || replyMutation.isPending}
+                            onClick={async () => {
+                                if (!hasText(replyContent) && !replyImageFile) return
+                                let imageUrl: string | undefined
+                                if (replyImageFile) {
+                                    imageUrl = await new Promise<string>((res, rej) => {
+                                        const reader = new FileReader()
+                                        reader.onload = () => res(reader.result as string)
+                                        reader.onerror = rej
+                                        reader.readAsDataURL(replyImageFile)
+                                    })
+                                }
+                                replyMutation.mutate({ channelId, content: replyContent, parentId: id, imageUrl })
+                            }}
+                        >
                             {replyMutation.isPending ? "Sending..." : "Send Reply"}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={closeEditor}>

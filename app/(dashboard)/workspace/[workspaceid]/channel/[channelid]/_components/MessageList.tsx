@@ -4,9 +4,9 @@ import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { MessageItem } from "./message/MessageItem"
 import { client, orpc } from "@/lib/orpc"
 import { useParams } from "next/navigation"
-import { useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useCallback, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Loader2 } from "lucide-react"
+import { Loader2, ArrowDown } from "lucide-react"
 
 const PAGE_SIZE = 30
 
@@ -21,6 +21,14 @@ export function MessageList({ onEditingChange }: { onEditingChange?: (editing: b
     const isFirstLoad = useRef(true)
     // Saves scroll state before fetching older pages so we can restore position
     const scrollAnchor = useRef<{ scrollHeight: number; scrollTop: number } | null>(null)
+    const [newMessageCount, setNewMessageCount] = useState(0)
+
+    function scrollToBottom() {
+        const el = scrollRef.current
+        if (!el) return
+        el.scrollTop = el.scrollHeight
+        setNewMessageCount(0)
+    }
 
     const {
         data,
@@ -70,7 +78,8 @@ export function MessageList({ onEditingChange }: { onEditingChange?: (editing: b
         if (!el || isFirstLoad.current) return
 
         const newMessages = messages.length
-        if (newMessages <= prevLength.current) {
+        const added = newMessages - prevLength.current
+        if (added <= 0) {
             prevLength.current = newMessages
             return
         }
@@ -78,6 +87,9 @@ export function MessageList({ onEditingChange }: { onEditingChange?: (editing: b
         const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
         if (distanceFromBottom < 120) {
             el.scrollTop = el.scrollHeight
+            setNewMessageCount(0)
+        } else {
+            setNewMessageCount(c => c + added)
         }
         prevLength.current = newMessages
     }, [messages.length])
@@ -141,6 +153,16 @@ export function MessageList({ onEditingChange }: { onEditingChange?: (editing: b
     }
 
     return (
+        <div className="relative h-full flex flex-col">
+        {newMessageCount > 0 && (
+            <button
+                onClick={scrollToBottom}
+                className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+            >
+                <ArrowDown className="size-3" />
+                {newMessageCount} new {newMessageCount === 1 ? 'message' : 'messages'}
+            </button>
+        )}
         <div ref={scrollRef} className="h-full overflow-y-auto px-4 py-2 flex flex-col">
             {/* Sentinel observed to trigger loading older messages */}
             <div ref={sentinelRef} className="h-px shrink-0" />
@@ -177,6 +199,7 @@ export function MessageList({ onEditingChange }: { onEditingChange?: (editing: b
                     />
                 ))}
             </div>
+        </div>
         </div>
     )
 }
