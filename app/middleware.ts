@@ -15,7 +15,7 @@ const aj = arcjet({
 
 export const config = {
     matcher: [
-        "/(dashboard|settings|explore|notifications|messages|profile|search|help|about)(.*)",
+        "/(dashboard|settings|explore|notifications|messages|profile|search|help)(.*)",
         "/api/(.*)",
     ]
 }
