@@ -59,7 +59,7 @@ export default function AboutPage() {
                 <section className="mx-auto max-w-4xl px-6 text-center">
                     <div className="inline-flex items-center gap-2 rounded-full border bg-muted px-4 py-1.5 text-sm text-muted-foreground mb-6">
                         <Layers className="size-3.5" />
-                        About theone
+                        About Clair
                     </div>
                     <h1 className="text-4xl md:text-6xl font-semibold tracking-tight text-balance">
                         Built for teams that move fast
