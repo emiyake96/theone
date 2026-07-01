@@ -1,10 +1,13 @@
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import prisma from '@/lib/db'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const ONLINE_THRESHOLD_MS = 2 * 60 * 1000 // 2 minutes
 
 // POST — heartbeat, called every 30s by the client
-export async function POST() {
+export async function POST(req: Request) {
+    const limited = checkRateLimit(req, 'presence-post', { limit: 10, windowSecs: 60 });
+    if (limited) return limited;
     const { getUser } = getKindeServerSession()
     const user = await getUser()
     if (!user) return new Response('Unauthorized', { status: 401 })
@@ -19,7 +22,9 @@ export async function POST() {
 }
 
 // GET — returns online user IDs and lastSeen timestamps for all users
-export async function GET() {
+export async function GET(req: Request) {
+    const limited = checkRateLimit(req, 'presence-get', { limit: 60, windowSecs: 60 });
+    if (limited) return limited;
     const { getUser } = getKindeServerSession()
     const user = await getUser()
     if (!user) return new Response('Unauthorized', { status: 401 })

@@ -1,11 +1,14 @@
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
 import Stripe from 'stripe'
 import prisma from '@/lib/db'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const SITE_URL = process.env.KINDE_SITE_URL ?? 'http://localhost:3000'
 
-export async function POST() {
+export async function POST(req: Request) {
+    const limited = checkRateLimit(req, 'stripe-portal', { limit: 5, windowSecs: 60 });
+    if (limited) return limited;
     const { getUser } = getKindeServerSession()
     const user = await getUser()
     if (!user) return new Response('Unauthorized', { status: 401 })

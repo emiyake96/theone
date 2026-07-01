@@ -11,7 +11,12 @@ function stripHtml(html: string) {
     return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+import { checkRateLimit } from "@/lib/rate-limit";
+
 export async function POST(req: Request) {
+    const limited = checkRateLimit(req, 'proofread', { limit: 10, windowSecs: 60 });
+    if (limited) return limited;
+
     const { getUser } = getKindeServerSession();
     const user = await getUser();
     if (!user) return new Response("Unauthorized", { status: 401 });
